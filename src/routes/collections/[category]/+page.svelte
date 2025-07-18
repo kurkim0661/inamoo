@@ -4,7 +4,7 @@
   export let category: string;
 
   // Products fetched from API
-  const products = writable([]);
+  const products = writable<any[]>([]);
 
   // Fetch products from API when category changes
   $: fetchProducts();
@@ -255,18 +255,14 @@
     <span style="margin-left:0.5rem;">&#9660;</span>
   </div>
   <div style="color:#888; font-size:0.95rem;">
-    {#await products}
-      loading...
-    {:then list}
-      {list.length} products
-    {:catch}
-      0 products
-    {/await}
+    {$products.length === 0
+      ? '0 products'
+      : `${$products.length} products`}
   </div>
 </div>
 
 <div class="products-grid">
-  {#await products}
+  {#if $products.length === 0}
     {#each Array(6) as _, i}
       <div class="product-card skeleton" aria-hidden="true">
         <div class="product-image skeleton-bg"></div>
@@ -278,42 +274,33 @@
         </div>
       </div>
     {/each}
-  {:then list}
-    {#if list.length === 0}
-      <div class="empty-state">
-        <img src="/static/empty-box.svg" alt="No products" class="empty-illustration" />
-        <div class="empty-title">상품이 없습니다</div>
-        <div class="empty-desc">새로운 상품이 곧 추가될 예정입니다. 잠시만 기다려주세요!</div>
-      </div>
-    {:else}
-      {#each list as product}
-        <div class="product-card enhanced">
-          <div class="product-image-wrap">
-            <img class="product-image" src={product.image} alt={product.name} />
-            <span class="product-category">{product.category}</span>
-          </div>
-          <div class="product-info">
-            <div class="product-name">{product.name}</div>
-            <div class="product-price">₩{product.price.toLocaleString()}</div>
-            <div class="product-desc">{product.description || '설명이 없습니다.'}</div>
-            <div class="product-meta">
-              <span class="product-date">
-                등록일: {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : '-'}
-              </span>
-              <span class="product-rating">
-                {'★'.repeat(product.rating)}
-              </span>
-            </div>
-            <button class="view-btn" tabindex="0">상세보기</button>
-          </div>
-        </div>
-      {/each}
-    {/if}
-  {:catch}
     <div class="empty-state">
       <img src="/static/empty-box.svg" alt="No products" class="empty-illustration" />
-      <div class="empty-title">상품을 불러올 수 없습니다</div>
-      <div class="empty-desc">네트워크 상태를 확인하거나, 잠시 후 다시 시도해주세요.</div>
+      <div class="empty-title">상품이 없습니다</div>
+      <div class="empty-desc">새로운 상품이 곧 추가될 예정입니다. 잠시만 기다려주세요!</div>
     </div>
-  {/await}
+  {:else}
+    {#each $products as product, i (product.id)}
+      <div class="product-card enhanced">
+        <div class="product-image-wrap">
+          <img class="product-image" src={product.image} alt={product.name} />
+          <span class="product-category">{product.category}</span>
+        </div>
+        <div class="product-info">
+          <div class="product-name">{product.name}</div>
+          <div class="product-price">₩{product.price.toLocaleString()}</div>
+          <div class="product-desc">{product.description || '설명이 없습니다.'}</div>
+          <div class="product-meta">
+            <span class="product-date">
+              등록일: {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : '-'}
+            </span>
+            <span class="product-rating">
+              {'★'.repeat(product.rating)}
+            </span>
+          </div>
+          <button class="view-btn" tabindex="0">상세보기</button>
+        </div>
+      </div>
+    {/each}
+  {/if}
 </div>

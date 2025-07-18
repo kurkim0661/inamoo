@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
   app:
     build:
@@ -30,4 +30,8 @@ services:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/inamoo"
     volumes:
       - ./:/app
+      - /app/node_modules
     command: yarn dev --host 0.0.0.0
+
+volumes:
+  pgdata:
