@@ -21,7 +21,7 @@
 <div class="menu-overlay" transition:slide={{ duration: 320 }}>
   <div class="menu-content">
     <div class="menu-header">
-      <span class="close-icon" on:click={closeMenu}>&#10005;</span>
+      <button type="button" class="close-icon" aria-label="Close menu" on:click={closeMenu}>&#10005;</button>
       <span class="menu-title">Inamoo</span>
     </div>
     <ul class="menu-links">
