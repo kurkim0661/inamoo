@@ -5,12 +5,17 @@
 
   // Products fetched from API
   const products = writable<any[]>([]);
+  const loading = writable<boolean>(true);
+
+  import { onMount } from 'svelte';
 
   // Fetch products from API when category changes
-  $: fetchProducts();
   async function fetchProducts() {
+    loading.set(true);
     try {
-      const res = await fetch('/api/products');
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+      const url = `${API_BASE_URL}/api/products`;
+      const res = await fetch(url);
       if (res.ok) {
         const data: any[] = await res.json();
         products.set(
@@ -29,7 +34,17 @@
       }
     } catch (e) {
       products.set([]);
+    } finally {
+      loading.set(false);
     }
+  }
+
+  onMount(() => {
+    fetchProducts();
+  });
+
+  $: if (category) {
+    fetchProducts();
   }
 
   // Mock category info
@@ -262,7 +277,7 @@
 </div>
 
 <div class="products-grid">
-  {#if $products.length === 0}
+  {#if $loading}
     {#each Array(6) as _, i}
       <div class="product-card skeleton" aria-hidden="true">
         <div class="product-image skeleton-bg"></div>
@@ -274,6 +289,7 @@
         </div>
       </div>
     {/each}
+  {:else if $products.length === 0}
     <div class="empty-state">
       <img src="/static/empty-box.svg" alt="No products" class="empty-illustration" />
       <div class="empty-title">상품이 없습니다</div>

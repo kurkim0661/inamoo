@@ -2,13 +2,24 @@
   import { onMount } from 'svelte';
   import { user, initGoogleSSO, logout } from '$lib/stores/auth';
   import { goto } from '$app/navigation';
+  import { get } from 'svelte/store';
+
+  let nickname = '';
+  let showExtraInfo = false;
+  let saving = false;
+  let error = '';
 
   onMount(() => {
     initGoogleSSO();
   });
 
   $: if ($user) {
-    goto('/');
+    // nickname이 없으면 추가 정보 입력 폼 노출
+    if (!$user.nickname) {
+      showExtraInfo = true;
+    } else {
+      goto('/');
+    }
   }
 </script>
 
@@ -74,13 +85,53 @@
     <div class="login-title">Login</div>
     <div class="login-desc">Sign in with your Google account to continue.</div>
     {#if $user}
-      <div class="user-info">
-        {#if $user.picture}
-          <img src="{$user.picture}" alt="Profile" />
-        {/if}
-        <span>{$user.name}</span>
-        <button class="logout-btn" on:click={logout}>Logout</button>
-      </div>
+      {#if showExtraInfo}
+        <form on:submit|preventDefault={async () => {
+          saving = true;
+          error = '';
+          try {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+            const res = await fetch(`${API_BASE_URL}/users/extra-info`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: $user.id,
+                nickname
+              })
+            });
+            if (!res.ok) {
+              throw new Error('추가 정보 저장 실패');
+            }
+            const updatedUser = await res.json();
+            user.set(updatedUser);
+            showExtraInfo = false;
+            goto('/');
+          } catch (e) {
+            error = e.message || '오류가 발생했습니다.';
+          } finally {
+            saving = false;
+          }
+        }}>
+          <div class="mb-4">
+            <label for="nickname" class="block mb-2 text-gray-700">닉네임을 입력하세요</label>
+            <input id="nickname" type="text" bind:value={nickname} class="border rounded px-3 py-2 w-full" required />
+          </div>
+          {#if error}
+            <div class="text-red-500 mb-2">{error}</div>
+          {/if}
+          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded" disabled={saving}>
+            {saving ? '저장 중...' : '저장'}
+          </button>
+        </form>
+      {:else}
+        <div class="user-info">
+          {#if $user.picture}
+            <img src="{$user.picture}" alt="Profile" />
+          {/if}
+          <span>{$user.name}</span>
+          <button class="logout-btn" on:click={logout}>Logout</button>
+        </div>
+      {/if}
     {:else}
       <div id="google-signin-btn"></div>
     {/if}
