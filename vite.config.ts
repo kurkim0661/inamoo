@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	server: {
+		allowedHosts: ['inamoo-app'],
 		proxy: {
 			'/api': {
 				target: process.env.BACKEND_URL || 'http://inamoo-backend:8080',
