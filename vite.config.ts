@@ -7,7 +7,7 @@ export default defineConfig({
 	server: {
 		proxy: {
 			'/api': {
-				target: process.env.BACKEND_URL || 'http://localhost:8080',
+				target: process.env.BACKEND_URL || 'http://inamoo-backend:8080',
 				changeOrigin: true,
 				secure: false
 			}
