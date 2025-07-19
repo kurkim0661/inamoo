@@ -1,5 +1,24 @@
 <script lang="ts">
+  import { user } from '../stores/auth';
+  import { goto } from '$app/navigation';
+  import { get } from 'svelte/store';
   export let openMenu: () => void;
+
+  function handleAccountClick() {
+    if (get(user)) {
+      goto('/profile');
+    } else {
+      goto('/login');
+    }
+  }
+
+  function handleCartClick() {
+    if (get(user)) {
+      goto('/cart');
+    } else {
+      goto('/login');
+    }
+  }
 </script>
 
 <nav class="navbar">
@@ -26,8 +45,16 @@
   </div>
   <div class="right">
     <span title="Search">&#128269;</span>
-    <a title="Account" href="/login" style="color:inherit;text-decoration:none;"><span>&#128100;</span></a>
-    <span title="Cart">&#128722;</span>
+    <span
+      title="Account"
+      style="color:inherit;text-decoration:none;"
+      on:click={handleAccountClick}
+      ><span>&#128100;</span></span>
+    <span
+      title="Cart"
+      class="cart-icon"
+      on:click={handleCartClick}
+      >&#128722;</span>
   </div>
 </nav>
 
@@ -77,6 +104,18 @@
     margin-right: 18px;
     font-size: 1.5rem;
     cursor: pointer;
+  }
+
+  .cart-icon {
+    position: relative;
+    font-size: 1.45rem;
+    color: #b48a5a;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .cart-icon:hover {
+    color: #7a7463;
+    transform: scale(1.13) rotate(-8deg);
+    text-shadow: 0 2px 8px rgba(180,138,90,0.12);
   }
 
   .inamoo-logo-wrapper {

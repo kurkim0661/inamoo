@@ -89,8 +89,10 @@
         <form on:submit|preventDefault={async () => {
           saving = true;
           error = '';
+          console.log('Form submitted', { user: $user, nickname });
           try {
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+            console.log('About to fetch', `${API_BASE_URL}/users/extra-info`);
             const res = await fetch(`${API_BASE_URL}/users/extra-info`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -99,16 +101,21 @@
                 nickname
               })
             });
+            console.log('Fetch response', res);
             if (!res.ok) {
+              console.log('Response not ok', res.status, res.statusText);
               throw new Error('추가 정보 저장 실패');
             }
             const updatedUser = await res.json();
+            console.log('Updated user', updatedUser);
             user.set(updatedUser);
             showExtraInfo = false;
             goto('/');
           } catch (e) {
-            error = e.message || '오류가 발생했습니다.';
+            console.error('Error in form submit', e);
+            error = e instanceof Error ? e.message : '오류가 발생했습니다.';
           } finally {
+            console.log('Form submit finally block');
             saving = false;
           }
         }}>
