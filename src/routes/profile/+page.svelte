@@ -37,13 +37,34 @@ let success = '';
   let postcodeLoading = true;
   let daumPostcodeLoaded: Promise<void>;
 
-  onMount(() => {
+  onMount(async () => {
     const u = get(user);
     if (u) {
-      name = u.name || '';
-      email = u.email || '';
-      googleProfileImage = u.picture || '';
-      // 필요시 nickname 등도 u에서 가져올 수 있음
+      try {
+        const res = await fetch(`/api/users/${u.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          name = data.name || '';
+          email = data.email || '';
+          googleProfileImage = data.profileImage || u.picture || '';
+          nickname = data.nickname || '';
+          gender = data.gender || '';
+          birthDate = data.birthDate || '';
+          address = data.address || '';
+          postcode = data.postcode || '';
+          phoneNumber = data.phoneNumber || '';
+          profileImage = data.profileImage || '';
+        } else {
+          // fallback: 최소한 기본 정보만
+          name = u.name || '';
+          email = u.email || '';
+          googleProfileImage = u.picture || '';
+        }
+      } catch (e) {
+        name = u.name || '';
+        email = u.email || '';
+        googleProfileImage = u.picture || '';
+      }
     }
     // 다음 우편번호 스크립트 로드 Promise 관리
     daumPostcodeLoaded = new Promise<void>((resolve, reject) => {
@@ -92,29 +113,44 @@ let success = '';
     error = '';
     success = '';
     try {
+      const payload = {
+        userId: get(user)?.id, // 인증된 유저의 ID를 포함
+        nickname,
+        gender,
+        birthDate,
+        address,
+        postcode,
+        phoneNumber,
+        profileImage
+        // 전화번호 인증 여부는 서버에 저장하지 않음(프론트에서만 체크)
+      };
+      console.log('[프로필 수정] 요청 URL:', '/api/users/extra-info');
+      console.log('[프로필 수정] 요청 payload:', payload);
+
       const res = await fetch('/api/users/extra-info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nickname,
-          gender,
-          birthDate,
-      address,
-      postcode,
-      phoneNumber,
-      profileImage
-      // 전화번호 인증 여부는 서버에 저장하지 않음(프론트에서만 체크)
-        })
+        body: JSON.stringify(payload)
       });
+
+      console.log('[프로필 수정] 응답 status:', res.status);
+      let data;
+      try {
+        data = await res.clone().json();
+        console.log('[프로필 수정] 응답 body:', data);
+      } catch (err) {
+        console.log('[프로필 수정] 응답 body 파싱 실패:', err);
+      }
+
       if (!res.ok) {
-        const data = await res.json();
-        error = data.message || '정보 저장에 실패했습니다.';
+        error = (data && data.message) || '정보 저장에 실패했습니다.';
         return;
       }
       success = '정보가 성공적으로 저장되었습니다.';
       setTimeout(() => goto('/'), 1500);
     } catch (e) {
       error = '네트워크 오류가 발생했습니다.';
+      console.log('[프로필 수정] 네트워크 오류:', e);
     }
   }
 </script>

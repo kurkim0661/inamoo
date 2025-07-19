@@ -5,17 +5,20 @@
   import { get } from 'svelte/store';
 
   let nickname = '';
+  let phone = '';
+  let gender: 'male' | 'female' | '' = '';
   let showExtraInfo = false;
   let saving = false;
   let error = '';
+  const phonePattern = '^[0-9]{10,11}$';
 
   onMount(() => {
     initGoogleSSO();
   });
 
   $: if ($user) {
-    // nickname이 없으면 추가 정보 입력 폼 노출
-    if (!$user.nickname) {
+    // 최초 로그인(신규 유저)일 때만 추가 정보 입력 폼 노출
+    if ($user.isNewUser) {
       showExtraInfo = true;
     } else {
       goto('/');
@@ -89,39 +92,53 @@
         <form on:submit|preventDefault={async () => {
           saving = true;
           error = '';
-          console.log('Form submitted', { user: $user, nickname });
+          // console.log('Form submitted', { user: $user, nickname });
           try {
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-            console.log('About to fetch', `${API_BASE_URL}/users/extra-info`);
+            // TODO: Replace with real backend logic for all fields
             const res = await fetch(`${API_BASE_URL}/users/extra-info`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 userId: $user.id,
-                nickname
+                nickname: nickname,
+                phoneNumber: phone,
+                gender: gender
               })
             });
-            console.log('Fetch response', res);
             if (!res.ok) {
-              console.log('Response not ok', res.status, res.statusText);
               throw new Error('추가 정보 저장 실패');
             }
             const updatedUser = await res.json();
-            console.log('Updated user', updatedUser);
             user.set(updatedUser);
             showExtraInfo = false;
             goto('/');
           } catch (e) {
-            console.error('Error in form submit', e);
             error = e instanceof Error ? e.message : '오류가 발생했습니다.';
           } finally {
-            console.log('Form submit finally block');
             saving = false;
           }
         }}>
           <div class="mb-4">
             <label for="nickname" class="block mb-2 text-gray-700">닉네임을 입력하세요</label>
             <input id="nickname" type="text" bind:value={nickname} class="border rounded px-3 py-2 w-full" required />
+          </div>
+          <div class="mb-4">
+            <label for="phone" class="block mb-2 text-gray-700">전화번호를 입력하세요</label>
+            <input id="phone" type="tel" bind:value={phone} class="border rounded px-3 py-2 w-full" required pattern={phonePattern} placeholder="01012345678" />
+          </div>
+          <div class="mb-6">
+            <label class="block mb-2 text-gray-700">성별을 선택하세요</label>
+            <div class="flex gap-6">
+              <label class="flex items-center">
+                <input type="radio" name="gender" value="male" bind:group={gender} required class="mr-2" />
+                남성
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="gender" value="female" bind:group={gender} required class="mr-2" />
+                여성
+              </label>
+            </div>
           </div>
           {#if error}
             <div class="text-red-500 mb-2">{error}</div>
