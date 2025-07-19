@@ -8,7 +8,7 @@
 
   onMount(async () => {
     try {
-      users = await apiGet("/users");
+      users = await apiGet("/api/users");
     } catch (e) {
       error = "사용자 정보를 불러오지 못했습니다.";
     } finally {
@@ -46,8 +46,21 @@
                   {user.status}
                 </span>
               </td>
-              <td class="py-2 px-4">
+              <td class="py-2 px-4 flex gap-2">
                 <button class="text-indigo-600 hover:underline text-sm">수정</button>
+                <button
+                  class="text-red-600 hover:underline text-sm"
+                  on:click={async () => {
+                    if (confirm('정말로 이 사용자를 삭제하시겠습니까?')) {
+                      try {
+                        await fetch(`/api/users/${user.id}`, { method: 'DELETE' });
+                        users = users.filter(u => u.id !== user.id);
+                      } catch (e) {
+                        alert('삭제에 실패했습니다.');
+                      }
+                    }
+                  }}
+                >삭제</button>
               </td>
             </tr>
           {/each}
