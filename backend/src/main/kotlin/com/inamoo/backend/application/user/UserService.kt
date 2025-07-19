@@ -85,6 +85,38 @@ class UserService(
     }
 
     /**
+     * 개인정보 수정
+     */
+    @Transactional
+    fun updateUser(id: Long, request: com.inamoo.backend.presentation.user.dto.UpdateUserRequest): User {
+        val userEntity = userRepository.findById(id).orElseThrow { IllegalArgumentException("User not found") }
+
+        request.email?.let { userEntity.email = it }
+        request.password?.let { userEntity.password = it } // 실제 서비스에서는 암호화 필요
+        request.name?.let { userEntity.name = it }
+        request.profileImage?.let { userEntity.profileImage = it }
+        request.nickname?.let { userEntity.nickname = it }
+        request.phoneNumber?.let { userEntity.phoneNumber = it }
+        request.address?.let { userEntity.address = it }
+        request.birthDate?.let { userEntity.birthDate = it }
+        userEntity.updatedAt = LocalDateTime.now()
+
+        val saved = userRepository.save(userEntity)
+        return User(
+            id = saved.id,
+            googleId = saved.googleId,
+            email = saved.email,
+            password = saved.password,
+            name = saved.name,
+            profileImage = saved.profileImage,
+            nickname = saved.nickname,
+            phoneNumber = saved.phoneNumber,
+            address = saved.address,
+            birthDate = saved.birthDate
+        )
+    }
+
+    /**
      * 전체 유저 목록을 반환합니다.
      */
     @Transactional(readOnly = true)
@@ -105,9 +137,14 @@ class UserService(
      * 추가 정보(닉네임) 저장
      */
     @Transactional
-    fun saveExtraUserInfo(userId: Long, nickname: String): User {
-        val userEntity = userRepository.findById(userId).orElseThrow { IllegalArgumentException("User not found") }
-        userEntity.nickname = nickname
+    fun saveExtraUserInfo(request: com.inamoo.backend.presentation.user.dto.ExtraUserInfoRequest): User {
+        val userEntity = userRepository.findById(request.userId).orElseThrow { IllegalArgumentException("User not found") }
+        request.nickname?.let { userEntity.nickname = it }
+        request.gender?.let { userEntity.gender = it }
+        request.birthDate?.let { userEntity.birthDate = it }
+        request.address?.let { userEntity.address = it }
+        request.phoneNumber?.let { userEntity.phoneNumber = it }
+        request.profileImage?.let { userEntity.profileImage = it }
         userEntity.updatedAt = LocalDateTime.now()
         val saved = userRepository.save(userEntity)
         return User(
@@ -116,7 +153,10 @@ class UserService(
             email = saved.email,
             name = saved.name,
             profileImage = saved.profileImage,
-            nickname = saved.nickname
+            nickname = saved.nickname,
+            phoneNumber = saved.phoneNumber,
+            address = saved.address,
+            birthDate = saved.birthDate
         )
     }
 }

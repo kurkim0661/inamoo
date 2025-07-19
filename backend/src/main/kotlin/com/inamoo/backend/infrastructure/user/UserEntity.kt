@@ -17,13 +17,28 @@ class UserEntity(
     var email: String = "",
 
     @Column(nullable = true)
+    var password: String? = null,
+
+    @Column(nullable = true)
     var name: String? = null,
 
     @Column(nullable = true)
     var profileImage: String? = null,
 
+    @Column(nullable = true)
+    var gender: String? = null,
+
     @Column(nullable = false, unique = true)
     var nickname: String = "",
+
+    @Column(nullable = true)
+    var phoneNumber: String? = null,
+
+    @Column(nullable = true)
+    var address: String? = null,
+
+    @Column(nullable = true)
+    var birthDate: String? = null, // yyyy-MM-dd
 
     @Column(nullable = false, updatable = false)
     var createdAt: LocalDateTime = LocalDateTime.now(),

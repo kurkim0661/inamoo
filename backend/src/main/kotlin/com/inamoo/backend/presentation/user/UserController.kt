@@ -2,6 +2,8 @@ package com.inamoo.backend.presentation.user
 
 import com.inamoo.backend.application.user.UserService
 import com.inamoo.backend.domain.user.User
+import com.inamoo.backend.presentation.user.dto.UpdateUserRequest
+import com.inamoo.backend.presentation.user.dto.ExtraUserInfoRequest
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -13,14 +15,16 @@ class UserController(
         return userService.getAllUsers()
     }
 
-    // 추가 정보 저장용 DTO
-    data class ExtraUserInfoRequest(
-        val userId: Long,
-        val nickname: String
-    )
+    @PatchMapping("/users/{id}")
+    fun updateUser(
+        @PathVariable id: Long,
+        @RequestBody request: UpdateUserRequest
+    ): User {
+        return userService.updateUser(id, request)
+    }
 
     @PostMapping("/users/extra-info")
     fun saveExtraUserInfo(@RequestBody request: ExtraUserInfoRequest): User {
-        return userService.saveExtraUserInfo(request.userId, request.nickname)
+        return userService.saveExtraUserInfo(request)
     }
 }

@@ -3,7 +3,7 @@ server:
 
 google:
   oauth:
-    client-id: "YOUR_GOOGLE_CLIENT_ID"
+    client-id: "694090990244-p82najlcv2n2rhifekg44vnfg30bopa1.apps.googleusercontent.com"
 
 spring:
   application:
