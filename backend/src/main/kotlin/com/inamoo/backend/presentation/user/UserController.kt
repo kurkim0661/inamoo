@@ -7,7 +7,7 @@ import com.inamoo.backend.presentation.user.dto.ExtraUserInfoRequest
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 class UserController(
     private val userService: UserService
 ) {
