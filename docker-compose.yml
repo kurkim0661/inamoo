@@ -28,7 +28,8 @@ services:
       - db
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/inamoo"
-      VITE_API_BASE_URL: "http://localhost:8080"
+      VITE_API_BASE_URL: "http://inamoo-backend:8080"
+      BACKEND_URL: "http://inamoo-backend:8080"
     volumes:
       - ./:/app
       - /app/node_modules
