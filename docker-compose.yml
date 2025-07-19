@@ -13,6 +13,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - inamoo-net
 
   app:
     build:
@@ -22,16 +24,19 @@ services:
     restart: always
     env_file:
       - .env.docker
-    ports:
-      - "5173:5173"
     depends_on:
       - db
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/inamoo"
+      VITE_API_BASE_URL: "http://localhost:8080"
     volumes:
       - ./:/app
       - /app/node_modules
     command: yarn dev --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    networks:
+      - inamoo-net
 
   backend:
     build:
@@ -39,8 +44,6 @@ services:
       dockerfile: Dockerfile
     container_name: inamoo-backend
     restart: always
-    ports:
-      - "8080:8080"
     depends_on:
       - db
     environment:
@@ -49,6 +52,10 @@ services:
       DB_NAME: inamoo
       DB_USER: postgres
       DB_PASSWORD: postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - inamoo-net
 
   admin:
     image: node:20
@@ -68,3 +75,7 @@ services:
 
 volumes:
   pgdata:
+
+networks:
+  inamoo-net:
+    driver: bridge

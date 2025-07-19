@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+google:
+  oauth:
+    client-id: "694090990244-p82najlcv2n2rhifekg44vnfg30bopa1.apps.googleusercontent.com"
+
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:inamoo}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
