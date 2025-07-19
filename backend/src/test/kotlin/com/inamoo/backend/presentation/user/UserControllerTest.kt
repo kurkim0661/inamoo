@@ -51,7 +51,7 @@ class UserControllerTest @Autowired constructor(
             "birthDate" to "1990-01-01"
         )
         mockMvc.perform(
-            patch("/users/${user.id}")
+            patch("/api/users/${user.id}")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest))
         )

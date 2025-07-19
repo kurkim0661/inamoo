@@ -10,5 +10,7 @@ data class User(
     val nickname: String = "",
     val phoneNumber: String? = null,
     val address: String? = null,
-    val birthDate: String? = null // yyyy-MM-dd
+    val birthDate: String? = null, // yyyy-MM-dd
+    val gender: String? = null,
+    val isNewUser: Boolean = false
 )

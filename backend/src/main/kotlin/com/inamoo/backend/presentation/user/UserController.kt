@@ -7,15 +7,21 @@ import com.inamoo.backend.presentation.user.dto.ExtraUserInfoRequest
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@RequestMapping("/api/users")
 class UserController(
     private val userService: UserService
 ) {
-    @GetMapping("/users")
+    @GetMapping
     fun getAllUsers(): List<User> {
         return userService.getAllUsers()
     }
 
-    @PatchMapping("/users/{id}")
+    @GetMapping("/{id}")
+    fun getUserById(@PathVariable id: Long): User {
+        return userService.getUserById(id)
+    }
+
+    @PatchMapping("/{id}")
     fun updateUser(
         @PathVariable id: Long,
         @RequestBody request: UpdateUserRequest
@@ -23,8 +29,13 @@ class UserController(
         return userService.updateUser(id, request)
     }
 
-    @PostMapping("/users/extra-info")
+    @PostMapping("/extra-info")
     fun saveExtraUserInfo(@RequestBody request: ExtraUserInfoRequest): User {
         return userService.saveExtraUserInfo(request)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteUser(@PathVariable id: Long) {
+        userService.deleteUserById(id)
     }
 }

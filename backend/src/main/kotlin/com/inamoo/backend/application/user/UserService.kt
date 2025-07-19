@@ -55,6 +55,7 @@ class UserService(
         // DB에서 유저 조회 또는 생성/업데이트
         var userEntity = userRepository.findByGoogleId(googleId)
         val now = LocalDateTime.now()
+        var isNewUser = false
         if (userEntity == null) {
             log.info("User not found, creating new user")
             userEntity = UserEntity(
@@ -62,9 +63,11 @@ class UserService(
                 email = email,
                 name = name,
                 profileImage = profileImage,
+                nickname = "google_${googleId}_${System.currentTimeMillis()}",
                 createdAt = now,
                 updatedAt = now
             )
+            isNewUser = true
         } else {
             log.info("User found, updating user")
             userEntity.email = email
@@ -80,8 +83,17 @@ class UserService(
             email = saved.email,
             name = saved.name,
             profileImage = saved.profileImage,
-            nickname = saved.nickname
+            nickname = saved.nickname ?: "",
+            isNewUser = isNewUser
         )
+    }
+
+    /**
+     * 사용자 삭제
+     */
+    @Transactional
+    fun deleteUserById(id: Long) {
+        userRepository.deleteById(id)
     }
 
     /**
@@ -104,12 +116,12 @@ class UserService(
         val saved = userRepository.save(userEntity)
         return User(
             id = saved.id,
-            googleId = saved.googleId,
-            email = saved.email,
-            password = saved.password,
+            googleId = saved.googleId ?: "",
+            email = saved.email ?: "",
+            password = saved.password ?: "",
             name = saved.name,
             profileImage = saved.profileImage,
-            nickname = saved.nickname,
+            nickname = saved.nickname ?: "",
             phoneNumber = saved.phoneNumber,
             address = saved.address,
             birthDate = saved.birthDate
@@ -124,13 +136,38 @@ class UserService(
         return userRepository.findAll().map { entity ->
             User(
                 id = entity.id,
-                googleId = entity.googleId,
-                email = entity.email,
+                googleId = entity.googleId ?: "",
+                email = entity.email ?: "",
                 name = entity.name,
                 profileImage = entity.profileImage,
-                nickname = entity.nickname
+                nickname = entity.nickname ?: "",
+                phoneNumber = entity.phoneNumber,
+                address = entity.address,
+                birthDate = entity.birthDate,
+                gender = entity.gender
             )
         }
+    }
+
+    /**
+     * 개별 유저 정보 반환
+     */
+    @Transactional(readOnly = true)
+    fun getUserById(id: Long): User {
+        val entity = userRepository.findById(id).orElseThrow { IllegalArgumentException("User not found") }
+        return User(
+            id = entity.id,
+            googleId = entity.googleId ?: "",
+            password = entity.password ?: "",
+            email = entity.email ?: "",
+            name = entity.name,
+            profileImage = entity.profileImage,
+            nickname = entity.nickname ?: "",
+            phoneNumber = entity.phoneNumber,
+            address = entity.address,
+            birthDate = entity.birthDate,
+            gender = entity.gender
+        )
     }
 
     /**
@@ -149,14 +186,15 @@ class UserService(
         val saved = userRepository.save(userEntity)
         return User(
             id = saved.id,
-            googleId = saved.googleId,
-            email = saved.email,
+            googleId = saved.googleId ?: "",
+            email = saved.email ?: "",
             name = saved.name,
             profileImage = saved.profileImage,
-            nickname = saved.nickname,
+            nickname = saved.nickname ?: "",
             phoneNumber = saved.phoneNumber,
             address = saved.address,
-            birthDate = saved.birthDate
+            birthDate = saved.birthDate,
+            gender = saved.gender
         )
     }
 }
